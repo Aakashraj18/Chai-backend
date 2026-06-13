@@ -54,7 +54,7 @@ const registerUser = asyncHandler( async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    console.log("Avatar upload result:", avatar);  // Add this
+    //console.log("Avatar upload result:", avatar);  // Add this
 
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
     console.log("Cover image upload result:", coverImage);  // Add this
