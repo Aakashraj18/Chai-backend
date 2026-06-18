@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from '../utils/cloudinary.js';
 import { ApiResponse } from '../utils/ApiResponse.js'
 import { jwt } from "jsonwebtoken"
 import { isPasswordCorrect } from '../models/user.model.js'
+import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
 const generateAccessAndRefreshTokens = async(userId) => {
     try {
@@ -302,7 +303,13 @@ const updateUserAvatar = asyncHandler(async(req, res) => {
             }
         },
         {new: true}
-    ).select("-passowrd")
+    ).select("-password")
+
+    const oldAvatarDeleted = await User.findById(req.user?._id)
+
+    if(oldAvatarDeleted.avatar){
+        await deleteFromCloudinary(oldAvatarDeleted.avatar)
+    }
 
     return res
     .status(200)
@@ -342,6 +349,11 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
     )
 })
 
+
+const getUserChannelprofile = asyncHandler(async(req, res) => {
+
+})
+
 export { 
     registerUser, 
     loginUser, 
@@ -351,5 +363,6 @@ export {
     getCurrentUser, 
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelprofile
 } 

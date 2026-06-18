@@ -13,3 +13,9 @@ const subscriptionsSchema = new Schema({
 }, { timestamps: true})
 
 export const Subscription = mongoose.model("Subscription", subscriptionsSchema)
+
+
+
+
+// CHANNEL count gives to SUBSCRIBERS
+// SUBSCRIBERS count gives to CHANNEL
