@@ -60,6 +60,15 @@ const getAllvideos = asyncHandler(async (req, res) => {
 
 const publishAVideo = asyncHandler(async (req, res) => {
 
+    // User sends form-data
+    // Validate fields
+    // Get files from multer
+    // Upload thumbnail to Cloudinary
+    // Upload video to Cloudinary
+    // Create MongoDB document
+    // Return created video
+
+
     // title and description in body fetch using request
     const { title, description } = req.body
 
@@ -167,4 +176,76 @@ const getVideoById = asyncHandler(async ( req, res) => {
             "video fetched successfully"
         )
     );
+})
+
+
+
+const updateVideo = asyncHandler(async (req, res) => {
+
+    // Get videoId
+    // Validate videoId
+    // Find video
+    // Check video exists
+    // Check user owns the video (optional but important)
+    // Update title/description if provided
+    // Upload new thumbnail if provided
+    // Upload new video file if provided
+    // Save changes.  
+    // Return updated video
+
+    
+    // get videoId
+    const { videoId } = req.params
+
+    if ( !isValidObjectId(videoId)) {
+        throw new ApiError(400, "Invalid video id")
+    }
+
+    // take video and check
+    const video = await Video.findById(videoId)
+
+    if (!video) {
+        throw new ApiError(404, "video not exists")
+    }
+
+
+    // check user own the video
+    if(video.owner.toString() !== req.user._id.toString()){
+        throw new ApiError(403, "Unauthorized");
+    }
+
+    // update title
+    if (title) {
+        video.title = title
+    }
+
+    // update description
+    if (description) {
+        video.description = description
+    }
+
+    // take thumbnailpath and update 
+    const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path
+    
+    if (thumbnailLocalPath){
+        const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+        video.thumbnail = url;
+    }
+
+    // take videopath and update
+    const videoLocalPath = req.files?.videoFile?.[0]?.path
+
+    if (videoLocalPath) {
+        const videoFile = await uploadOnCloudinary(videoLocalPath)
+        video.videoFile = url
+    }
+
+    // save and update video
+    await video.save({validateBeforeSave: false})
+})
+
+
+
+const deleteVideo = asyncHandler( async (req, res) => {
+    const { videoId }
 })
