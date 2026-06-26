@@ -345,5 +345,6 @@ export {
     getVideoById,
     updateVideo,
     deleteVideo,
+    togglePublishStatus
 }
 
