@@ -57,7 +57,59 @@ const addComment = asyncHandler(async(req, res) => {
 })
 
 
+const updateComment = asyncHandler(async(req, res) => {
+
+    // Get commentId
+    // Validate commentId
+    // Get new content from req.body
+    // Validate content
+    // Find comment
+    // If not found → 404
+    // Check user is the owner
+    // Update content
+    // Save
+    // Return updated comment
+
+    
+    const { commentId } = req.params
+
+    if( !validateObjectId(commentId) ){
+        throw new ApiError(400, "Invalid video id")
+    }
+
+    const { content } = req.body
+
+    if( !content?.trim()){
+        throw new ApiError(400, "Comment cannot be empty")
+    }
+
+    const comment = await Video.findById(videoId)
+
+    if( !comment ){
+        throw new ApiError(404, "video not found")
+    }
+
+    if(comment.owner.toString !== req.user._id.toString()){
+        throw new ApiError(403, "Unauthorized")
+    }
+
+    comment.content = content
+    await comment.save()
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            comment,
+            "Comment updated successfully"
+        )
+    );
+})
+
+
 export {
     getVideoComments,
-    addComment
+    addComment,
+    updateComment
 }
