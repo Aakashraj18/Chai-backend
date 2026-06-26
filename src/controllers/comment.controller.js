@@ -4,9 +4,59 @@ import { ApiResponse } from '../utils/ApiResponse.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 
 const getVideoComments = asyncHandler(async(req, res) => {
+
+    // Get videoId
+    // Validate videoId
+    // Check video exists (recommended)
+    // Pagination (page, limit)
+    // Find comments where video = videoId
+    // Sort (usually newest first)
+    // Return comments
+
+
     const { videoId } = req.params
     const { page = 1, limit = 10 } = req.query
+
+    if( !validateObjectId(videoId) ){
+        throw new ApiError(400, "video id not found")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if( !video ){
+        throw new ApiError(404, "video not found")
+    }
+
+    const skip = (page - 1) * limit
+
+    const comments = await Comment.find({
+        video: videoId
+    })
+    .sort({ createdAt: -1})
+    .skip( skip )
+    .limit(Number(limit))
+
+    const totalComments = await Comment.countDocument({
+        vdeo: videoId
+    })
+
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                comments,
+                totalComments,
+                currentPage: Number(page),
+                totalPages: Math.ceil(totalComments / limit)
+            },
+            "Comments fetched successfullly"
+        )
+    );
 })
+
 
 
 const addComment = asyncHandler(async(req, res) => {
@@ -149,6 +199,7 @@ const deleteComment = asyncHandler(async(req, res) => {
         )
     );
 })
+
 
 
 export {
