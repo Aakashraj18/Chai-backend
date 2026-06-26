@@ -1,7 +1,7 @@
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
-import { uploadOnCloudinary } from "../utils/cloudinary";
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/cloudinary";
 import { User } from "../models/user.model.js"
 import { isValidObjectId } from "mongoose";
 import { Video } from "../models/video.model.js"
@@ -247,5 +247,57 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 
 const deleteVideo = asyncHandler( async (req, res) => {
-    const { videoId }
+
+    // Get videoId
+    // Validate videoId
+    // Find the video
+    // If not found → 404
+    // Check user is the owner
+    // Delete video from Cloudinary
+    // Delete thumbnail from Cloudinary
+    // Delete document from MongoDB
+    // Return success response
+
+
+    const { videoId } = req.params
+
+    if( !isValidObjectId(videoId) ) {
+        throw new ApiError(400, "Invaid video id")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if(!video) {
+        throw new ApiError(404, "video is not present")
+    }
+
+    if(video.owner.toString() !== req.user._id.toString()){
+        throw new ApiError(403,"Unauthorized")
+    }
+
+    await deleteFromCloudinary(video,videoFile)
+    await deleteFromCloudinary(video.thumbnail)
+
+    await Video.findByIdAndDelete(videoId)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {},
+            "Video deleted succesfully"
+        )
+    );
 })
+
+
+
+export {
+    getAllvideos,
+    publishAVideo,
+    getVideoById,
+    updateVideo,
+    deleteVideo,
+}
+
