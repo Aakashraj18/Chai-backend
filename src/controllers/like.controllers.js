@@ -3,6 +3,7 @@ import { Like } from "../models/like.model.js"
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { notDeepEqual } from "assert";
 
 const toggleVideoLike = asyncHandler( async( req, res) => {
 
@@ -62,6 +63,65 @@ const toggleVideoLike = asyncHandler( async( req, res) => {
 })
 
 
+const toggleCommentLike = asyncHandler(async(req, res) => {
+
+    // get commentId
+    // validate comment
+    // find comment
+    // check comment exists or not
+    // find like exists 
+    // if Yes then delete and return 
+    // else liked nad return 
+
+    const { commentId } = req.params
+
+    if( !isValidObjectId(commentId) ){
+        throw new ApiError(400, " comment id is not valid")
+    }
+
+    const comment = await findById(commentId) 
+
+    if( !comment ){
+        throw new ApiError(404, "comment is not valid")
+    }
+
+    const existingLike = await Like.findOne({
+        comment: commentId,
+        likedBy: req.user._id
+    })
+
+    if( existingLike ){
+        await existingLike.deleteOne()
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { liked : false},
+                "comment unliked successfully"
+            )
+        );
+    }
+
+    await Like.create({
+        comment: commentId,
+        likedBy: req.user._id
+    })
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            { liked: true },
+            "comment liked successfully"
+        )
+    );
+})
+
+
 export {
-    toggleVideoLike
+    toggleVideoLike,
+    toggleCommentLike
 }
