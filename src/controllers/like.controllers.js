@@ -1,9 +1,14 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Like } from "../models/like.model.js"
+import { Video } from "../models/video.model.js";
+import { Comment } from "../models/comment.model.js";
+import { Like } from "../models/like.model.js";
+import { Tweet } from "../models/tweet.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { notDeepEqual } from "assert";
+import { validateHeaderName } from "http";
+import { exists } from "fs";
 
 const toggleVideoLike = asyncHandler( async( req, res) => {
 
@@ -21,7 +26,7 @@ const toggleVideoLike = asyncHandler( async( req, res) => {
         throw new ApiError(400, "video id is ot valid")
     }
 
-    const video = await findById(videoId)
+    const video = await Video.findById(videoId)
 
     if( !video ){
         throw new ApiError(404, "video is not valid")
@@ -79,7 +84,7 @@ const toggleCommentLike = asyncHandler(async(req, res) => {
         throw new ApiError(400, " comment id is not valid")
     }
 
-    const comment = await findById(commentId) 
+    const comment = await Comment.findById(commentId) 
 
     if( !comment ){
         throw new ApiError(404, "comment is not valid")
@@ -121,7 +126,68 @@ const toggleCommentLike = asyncHandler(async(req, res) => {
 })
 
 
+
+const toggleTweetLike = asyncHandler(async(req, res) => {
+
+    // Get tweetId
+    // validate
+    // find tweet
+    // tweet exists
+    // find like 
+    // if Yes then delete and return 
+    // else liked and return 
+
+
+    const { tweetId } = req.params
+
+    if( !isValidObjectId(tweetId) ){
+        throw new ApiError(400, "tweet id is invalid")
+    }
+
+    const tweet = await Tweet.findById(tweetId)
+
+    if( !tweet ){
+        throw new ApiError(404, "Tweet not found")
+    }
+
+    const existingLike = await Like.findOne({
+        tweet: tweetId,
+        likedBy: req.user._id
+    })
+
+    if( existingLike ){
+        await existingLike.deleteOne();
+
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { liked: false},
+                "Tweet unliked successfully"
+            )
+        );
+    }
+
+    await Like.create({
+        tweet: tweetId,
+        likedBy: req.user._id
+    })
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            { liked: true},
+            "Tweet liked successfully"
+        )
+    );
+})
+
+
 export {
     toggleVideoLike,
-    toggleCommentLike
+    toggleCommentLike,
+    toggleTweetLike
 }
