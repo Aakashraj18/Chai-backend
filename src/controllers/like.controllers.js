@@ -186,8 +186,46 @@ const toggleTweetLike = asyncHandler(async(req, res) => {
 })
 
 
+const getLikedVideos = asyncHandler(async(req, res) => {
+
+    // Get current user ID
+    // Find all Like documents where:
+    //     likedBy = req.user._id
+    //     video exists
+    // Extract video IDs
+    // Fetch video details
+    // Return liked videos
+
+
+    const userId = req.user._id
+
+    const likes = await Like.find({
+        likedBy: userId,
+        video: { $exists: true}
+    })
+
+    const videoId = likes.map(like => like.video)
+
+    const videos = await Video.find({
+        _id: { $in: videoIds }
+    })
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            videos,
+            "Liked video fetched successfully"
+        )
+    );
+})
+
+
+
 export {
     toggleVideoLike,
     toggleCommentLike,
-    toggleTweetLike
+    toggleTweetLike,
+    getLikedVideos
 }
